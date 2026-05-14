@@ -11,49 +11,37 @@ This document provides guidance on how to retrieve economic data from the Federa
 1. **Set Up the FRED Connection**:
     Use the `fredrs` function to create FRED REST connection object.
 
-2. **Search for Data**:
-    Use the `search` function to find datasets of interest.
+2. **Search for Series Name**:
+    Find the series name from the Federal Economic Data System. 
 
 3. **Retrieve Data**:
-    Use the `fetch` function to download the data.
+    Use the `series` function to download the data.
 
 ## Example: Retrieve GDP Data
 Below is an example of retrieving U.S. GDP data from FRED.
 
 ```matlab
 % Step 1: Create FRED REST connection object
-c = fredrs('Your_API_Key_Here');
+c = fredrs(apikey);
 
-% Step 2: Search for GDP data
-searchResults = search(c, 'GDP');
-
-% Display the first few search results
-disp(searchResults(1:5, :));
-
-% Step 3: Fetch GDP data
+% Step 2: Fetch GDP data
 % Replace 'GDPC1' with the series ID of the desired GDP dataset
-data = fetch(c, 'GDPC1');
+data = series(c, 'GDPC1', 'observations');
+dinfo = series(c,'GDPC1');
+values = data.observations{1,1}(:,3:4);
 
-% Step 4: Plot the data
-dates = data.Data(:, 1); % Extract dates
-values = data.Data(:, 2); % Extract values
-
+% Step 3 (Optional): Plot the data
 figure;
-plot(dates, values);
-datetick('x', 'yyyy');
-title('Real Gross Domestic Product (GDP)');
+plot(values.date, values.value,'-');
+title(dinfo.seriess.title);
 xlabel('Year');
-ylabel('Billions of Chained 2012 Dollars');
+ylabel(dinfo.seriess.units);
 grid on;
-
-% Step 5: Close the connection
-close(c);
 ```
 
 ## Notes
 - Replace `'Your_API_Key_Here'` with your actual FRED API key.
-- Use the `search` function to explore other datasets available in FRED.
 
 ## References
 - [FRED API Documentation](https://fred.stlouisfed.org/docs/api/fred/)
-- MATLAB Datafeed Toolbox Documentation
+- [MATLAB Datafeed Toolbox Documentation](https://www.mathworks.com/help/datafeed/index.html)
