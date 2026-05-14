@@ -11,18 +11,18 @@ This document provides guidance on how to retrieve economic data from the Federa
 1. **Set Up the FRED Connection**:
     Use the `fredrs` function to create FRED REST connection object.
 
-2. **Search for Series Name**:
-    Find the series name from the Federal Economic Data System. 
+2. **Search for Series ID**:
+    Find the series name from the Federal Economic Data System. For example, real gross domestic product: GDPC1.
 
 3. **Retrieve Data**:
-    Use the `series` function to download the data.
+    Use the `series` function to download the data. The numeric values are stored in the observations.
 
 ## Example: Retrieve GDP Data
 Below is an example of retrieving U.S. GDP data from FRED.
 
 ```matlab
 % Step 1: Create FRED REST connection object
-c = fredrs(apikey);
+c = fredrs('Your_API_Key_Here');
 
 % Step 2: Fetch GDP data
 % Replace 'GDPC1' with the series ID of the desired GDP dataset
