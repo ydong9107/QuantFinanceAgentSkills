@@ -3,13 +3,13 @@
 This document provides guidance on how to retrieve economic data from the Federal Reserve Economic Data (FRED) database using MATLAB. FRED is a comprehensive source of economic data maintained by the Federal Reserve Bank of St. Louis.
 
 ## Prerequisites
-1. **MATLAB Installed**: Ensure MATLAB is installed on your system.
+1. **MATLAB Installed**: Ensure MATLAB and datafeed toolbox are installed in the system.
 2. **Datafeed Toolbox**: The Datafeed Toolbox is required to access FRED data.
 3. **FRED API Key**: Obtain an API key from the FRED website (https://fred.stlouisfed.org/).
 
 ## Steps to Retrieve Data
 1. **Set Up the FRED Connection**:
-    Use the `fred` function to establish a connection to the FRED database.
+    Use the `fredrs` function to create FRED REST connection object.
 
 2. **Search for Data**:
     Use the `search` function to find datasets of interest.
