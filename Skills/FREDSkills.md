@@ -21,8 +21,8 @@ This document provides guidance on how to retrieve economic data from the Federa
 Below is an example of retrieving U.S. GDP data from FRED.
 
 ```matlab
-% Step 1: Establish a connection to FRED
-c = fred('Your_API_Key_Here');
+% Step 1: Create FRED REST connection object
+c = fredrs('Your_API_Key_Here');
 
 % Step 2: Search for GDP data
 searchResults = search(c, 'GDP');
