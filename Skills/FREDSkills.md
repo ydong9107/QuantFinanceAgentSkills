@@ -22,6 +22,7 @@ Below is an example of retrieving U.S. GDP data from FRED.
 
 ```matlab
 % Step 1: Create FRED REST connection object
+getSecret("FRED_API_Key");
 c = fredrs('Your_API_Key_Here');
 
 % Step 2: Fetch GDP data
@@ -40,6 +41,7 @@ grid on;
 ```
 
 ## Notes
+- Retrieve secret value from MATLAB vault: ```getSecret()```
 - Replace `'Your_API_Key_Here'` with your actual FRED API key.
 
 ## References
