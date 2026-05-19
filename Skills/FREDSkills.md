@@ -3,13 +3,13 @@
 This document provides guidance on how to retrieve economic data from the Federal Reserve Economic Data (FRED) database using MATLAB. FRED is a comprehensive source of economic data maintained by the Federal Reserve Bank of St. Louis.
 
 ## Prerequisites
-1. **MATLAB Installed**: Ensure MATLAB and datafeed toolbox are installed in the system.
+1. **MATLAB Installed**: Ensure MATLAB and Datafeed toolbox are installed in the system.
 2. **Datafeed Toolbox**: The Datafeed Toolbox is required to access FRED data.
 3. **FRED API Key**: Obtain an API key from the FRED website (https://fred.stlouisfed.org/).
 
 ## Steps to Retrieve Data
 1. **Set Up the FRED Connection**:
-    Use the `fredrs` function to create FRED REST connection object.
+    Use the `fredrs` function to create a FRED REST connection object.
 
 2. **Search for Series ID**:
     Find the series name from the Federal Economic Data System. For example, real gross domestic product: GDPC1.
@@ -22,8 +22,7 @@ Below is an example of retrieving U.S. GDP data from FRED.
 
 ```matlab
 % Step 1: Create FRED REST connection object
-getSecret("FRED_API_Key");
-c = fredrs('Your_API_Key_Here');
+c = fredrs(getSecret("MyFredAPIKey"));
 
 % Step 2: Fetch GDP data
 % Replace 'GDPC1' with the series ID of the desired GDP dataset
@@ -41,8 +40,10 @@ grid on;
 ```
 
 ## Notes
-- Retrieve secret value from MATLAB vault: ```getSecret()```
-- Replace `'Your_API_Key_Here'` with your actual FRED API key.
+- Retrieve secret value from MATLAB vault: ```getSecret()```. For the first time, use the ```SetSecret()``` function to add secret to MATLAB vault.
+- In this workflow, you need to use your own actual FRED API key.
+- To get the data for the variable GNP given a specific date range.  Note that the date format has to be YYYY-MM-DD.
+  ```data = series(c,"GDPC1","observations","observation_start","2024-10-01","observation_end","2025-10-01")```
 
 ## References
 - [FRED API Documentation](https://fred.stlouisfed.org/docs/api/fred/)
