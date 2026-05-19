@@ -42,7 +42,7 @@ grid on;
 ## Notes
 - Retrieve secret value from MATLAB vault: ```getSecret()```. For the first time, use the ```SetSecret()``` function to add secret to MATLAB vault.
 - In this workflow, you need to use your own actual FRED API key.
-- To get the data for the variable GNP given a specific date range.  Note that the date format has to be YYYY-MM-DD.
+- To get the data for the variable GDP given a specific date range.  Note that the date format has to be YYYY-MM-DD.
   ```data = series(c,"GDPC1","observations","observation_start","2024-10-01","observation_end","2025-10-01")```
 
 ## References
