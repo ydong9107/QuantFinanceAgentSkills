@@ -15,17 +15,21 @@ An interest rate swap is a financial derivative where two parties exchange cash 
 
 ## Steps to Value an Interest Rate Swap
 
-### Step 1: Set Up the Discount Curve
+### Step 1: Set Up the Discount Curve and create ratecurve object
 Create or retrieve a discount curve that represents the term structure of interest rates. This curve is essential for discounting future cash flows.
 
-### Step 2: Create the Interest Rate Swap Instrument
+### Step 2: Create the Interest Rate Swap Instrument Object
 Define the swap specifications including:
 - Start date
 - Maturity date
-- Fixed rate
-- Floating rate reference (e.g., 3M LIBOR)
+- Leg rate for each leg: Floating and Fixed
+- Leg type
+- Reset Frequency
+- Basis
 - Notional principal
-- Payment frequencies
+- Business Day Convention
+- Start Date
+If there are any items missing, fill with the default values.
 
 ### Step 3: Calculate Swap Cash Flows
 Determine the fixed and floating payment schedules based on the swap specifications.
