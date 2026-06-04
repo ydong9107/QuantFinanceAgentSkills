@@ -3,7 +3,9 @@
         "matlab": {
             "type": "stdio",
             "command": "M:\\matlab-mcp-core-server-win64.exe",
-            "args": []
+            "args": ["--disable-telemetry=true",
+                     "--matlab-root=C:\\Program Files\\MATLAB\\R2025b"
+                    ]
         }
     }
 }
