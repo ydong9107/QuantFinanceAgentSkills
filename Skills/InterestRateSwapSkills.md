@@ -31,146 +31,36 @@ Define the swap specifications including:
 - Start Date
 If there are any items missing, fill with the default values.
 
-### Step 3: Calculate Swap Cash Flows
-Determine the fixed and floating payment schedules based on the swap specifications.
+### Step 3: Create Pricer Object
+Use finpricer() to create a discount pricer object.
 
-### Step 4: Discount Cash Flows
-Apply the discount curve to present-value the future cash flows.
-
-### Step 5: Calculate Swap Value
-Compute the net present value of the swap by comparing fixed and floating leg values.
+### Step 4: Price Swap Instrument
+Use price to compute the price and sensitivities for the vanilla swap instrument.
 
 ## Example: Value a 5-Year Interest Rate Swap
 
-Below is a comprehensive example of valuing a 5-year interest rate swap with a 3% fixed rate and 3M-LIBOR floating rate.
+Below is a comprehensive example of valuing a 5-year interest rate swap with a 1.9% fixed rate and given floating rate. The maturity date of this swap is 2024/9/15.
 
 ```matlab
 % Step 1: Create a discount curve from market spot rates
-% Define spot rates (annual, e.g., 2%, 2.5%, 3%, etc.)
-spotRates = [0.02; 0.025; 0.03; 0.035; 0.04];  % 2%, 2.5%, 3%, 3.5%, 4%
-maturityTerms = [1; 2; 3; 4; 5];  % Years
+Settle = datetime(2019,9,15);
+Type = 'zero';
+ZeroTimes = [calmonths(6) calyears([1 2 3 4 5 7 10 20 30])]';
+ZeroRates = [0.0052 0.0055 0.0061 0.0073 0.0094 0.0119 0.0168 0.0222 0.0293 0.0307]';
+ZeroDates = Settle + ZeroTimes;
+ 
+myRC = ratecurve('zero',Settle,ZeroDates,ZeroRates)
 
-% Create a rate curve object
-curve = ratecurve("zero", today(), maturityTerms, spotRates);
+% Step 2: Use fininstrument to create a vanilla swap instrument object
+Swap = fininstrument("Swap",'Maturity',datetime(2024,9,15),'LegRate',[0.022 0.019 ],'LegType',["float","fixed"],'ProjectionCurve',myRC,'Name',"swap_instrument")
 
-% Step 2: Define the interest rate swap specifications
-swapStartDate = today();
-swapMaturityDate = swapStartDate + years(5);  % 5-year swap
-fixedRate = 0.03;  % 3% fixed rate
-notionalAmount = 1e6;  % $1 million notional
-dayCount = "Actual/360";  % Day count convention
-fixedPaymentFrequency = 2;  % Semi-annual (2 times per year)
-floatingPaymentFrequency = 4;  % Quarterly (4 times per year) for 3M-LIBOR
+% Step 3: Use finpricer to create a Discount pricer object and use the ratecurve object for the 'DiscountCurve' name-value pair argument.
+outPricer = finpricer("Discount", 'DiscountCurve',myRC)
 
-% Step 3: Create the interest rate swap instrument
-% Create a fixed leg
-fixedLeg = "Fixed";
-fixedSchedule = [swapStartDate, swapMaturityDate];
-
-% Create a floating leg
-floatingLeg = "Floating";
-floatingLegRates = [0.025; 0.03; 0.035; 0.04];  % Forward rates for floating leg
-
-% Step 4: Generate payment schedules
-% Fixed leg payment dates (semi-annual)
-fixedPaymentDates = swapStartDate:calmonths(6):swapMaturityDate;
-fixedPaymentDates = fixedPaymentDates(fixedPaymentDates <= swapMaturityDate)';
-
-% Floating leg payment dates (quarterly)
-floatingPaymentDates = swapStartDate:calmonths(3):swapMaturityDate;
-floatingPaymentDates = floatingPaymentDates(floatingPaymentDates <= swapMaturityDate)';
-
-% Step 5: Calculate discounting factors
-% Calculate discount factors for all payment dates
-allPaymentDates = unique([fixedPaymentDates; floatingPaymentDates]);
-discountFactors = discountfactor(curve, allPaymentDates);
-
-% Step 6: Calculate swap cash flows
-% Fixed leg cash flows
-fixedCashFlows = zeros(length(fixedPaymentDates), 1);
-for i = 1:length(fixedPaymentDates)
-    if i == 1
-        daysBetween = yearfrac(swapStartDate, fixedPaymentDates(i), dayCount);
-    else
-        daysBetween = yearfrac(fixedPaymentDates(i-1), fixedPaymentDates(i), dayCount);
-    end
-    fixedCashFlows(i) = notionalAmount * fixedRate * daysBetween;
-end
-
-% Floating leg cash flows (using forward rates)
-% For simplicity, using pre-determined rates; in practice, use market forward rates
-floatingCashFlows = zeros(length(floatingPaymentDates), 1);
-floatingRates = [0.025; 0.026; 0.027; 0.028; 0.029; 0.03; ...
-                 0.031; 0.032; 0.033; 0.034; 0.035; 0.036; ...
-                 0.037; 0.038; 0.039; 0.04; 0.041; 0.042; ...
-                 0.043; 0.044];  % Example forward rates for each quarter
-
-for i = 1:min(length(floatingPaymentDates), length(floatingRates))
-    if i == 1
-        daysBetween = yearfrac(swapStartDate, floatingPaymentDates(i), dayCount);
-    else
-        daysBetween = yearfrac(floatingPaymentDates(i-1), floatingPaymentDates(i), dayCount);
-    end
-    floatingCashFlows(i) = notionalAmount * floatingRates(i) * daysBetween;
-end
-
-% Step 7: Calculate present values
-% PV of fixed leg (receiver pays fixed)
-pv_fixed = 0;
-for i = 1:length(fixedPaymentDates)
-    idx = find(allPaymentDates == fixedPaymentDates(i));
-    pv_fixed = pv_fixed + fixedCashFlows(i) * discountFactors(idx);
-end
-
-% PV of floating leg (receiver receives floating)
-pv_floating = 0;
-for i = 1:length(floatingPaymentDates)
-    if i <= length(floatingCashFlows)
-        idx = find(allPaymentDates == floatingPaymentDates(i));
-        if ~isempty(idx)
-            pv_floating = pv_floating + floatingCashFlows(i) * discountFactors(idx);
-        end
-    end
-end
-
-% Step 8: Calculate swap value
-% From the perspective of the fixed-rate payer
-swapValue = pv_floating - pv_fixed;
-
-% Display results
-fprintf('Interest Rate Swap Valuation Results:\n');
-fprintf('======================================\n');
-fprintf('Swap Start Date: %s\n', datestr(swapStartDate));
-fprintf('Swap Maturity Date: %s\n', datestr(swapMaturityDate));
-fprintf('Fixed Rate: %.2f%%\n', fixedRate * 100);
-fprintf('Notional Amount: $%.0f\n', notionalAmount);
-fprintf('---\n');
-fprintf('PV of Fixed Leg: $%.2f\n', pv_fixed);
-fprintf('PV of Floating Leg: $%.2f\n', pv_floating);
-fprintf('Swap Value (receiver of fixed): $%.2f\n', swapValue);
-fprintf('Swap Value (payer of fixed): $%.2f\n', -swapValue);
-```
-
-## Alternative: Using Financial Instrument Toolbox Objects
-
-For a more advanced and production-ready approach, use Financial Instrument Toolbox objects:
-
-```matlab
-% Create instruments using Financial Instrument Toolbox
-assetIns = fininstrument("Swap", ...
-    "Leg1Type", "Fixed", ...
-    "Leg1Rate", 0.03, ...
-    "Leg2Type", "Float", ...
-    "Leg2Spread", 0.01, ...
-    "Leg2ResetTimes", [0.25, 0.5, 0.75, 1], ...
-    "StartDate", today(), ...
-    "Maturity", years(5), ...
-    "Principal", 1e6, ...
-    "DayCount", "Actual/360", ...
-    "PaymentFrequencies", [2, 4]);  % Fixed: semi-annual, Floating: quarterly
-
-% Price the swap
-priceSwap = price(pricer, assetIns, "DiscountCurve", curve);
+% Step 4: Price Swap Instrument
+[Price, outPR] = price(outPricer, Swap,["all"])
+% Display the results
+outPR.Results
 ```
 
 ## Important Notes
@@ -180,9 +70,15 @@ priceSwap = price(pricer, assetIns, "DiscountCurve", curve);
 - **SOFR Transition**: As of 2021, LIBOR is being phased out. Use SOFR (Secured Overnight Financing Rate) instead of LIBOR for U.S. dollar swaps.
 - **Basis Spreads**: Account for basis spreads between different floating rate indices.
 - **Valuation Date vs. Trade Date**: Always specify the valuation date; swap values change continuously as rates move.
+- **Data Inputs**: Load the swap settings and curve rate from Excel workbook. Assign these values into ratecurve and swap object.
+- **Available Models**: ratecurve object, Hull White model, Black Karasinski model, Black Dermon Toy model, Cox Ingersoll Ross model and Linear Gaussian 2F model
+- **Available Pricers**: Discount, IRTree for Hull White, Black Karasinski, Cox Ingersoll Ross, or Black Derman Toy models; IRMonteCarlo for Hull White, Black Karasinski, or Linear Gaussian 2F models
+
+
 
 ## References
 - [Financial Instrument Toolbox Documentation](https://www.mathworks.com/help/fininst/)
+- [Choose Instruments, Models, and Pricers](https://www.mathworks.com/help/fininst/choosing-instruments-models-and-pricers.html)
 - [Financial Toolbox Documentation](https://www.mathworks.com/help/finance/)
 - [Interest Rate Swap Pricing Models](https://www.mathworks.com/help/fininst/interest-rate-swap-models.html)
 - [ISDA Standard Definitions](https://www.isda.org/standards/)
