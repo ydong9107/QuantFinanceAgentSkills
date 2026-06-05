@@ -67,13 +67,14 @@ outPR.Results
 
 ## Important Notes
 - **Day Count Conventions**: Common conventions include Actual/360, Actual/Actual (ISDA), and 30/360. Ensure consistency with market conventions.
-- **Reset Dates**: Floating rate legs reset at specific dates. Use `ratebetweendate` or market-based forward rate methods to determine floating rates.
+- **Reset Dates**: Floating rate legs reset at specific dates.
+- **Curve Dates**: Convert tenors to dates using calyears(), instead of using years().
 - **Curve Bootstrapping**: For real-world applications, bootstrap the discount curve from market instruments (Treasuries, LIBOR futures, swap rates).
 - **SOFR Transition**: As of 2021, LIBOR is being phased out. Use SOFR (Secured Overnight Financing Rate) instead of LIBOR for U.S. dollar swaps.
 - **Basis Spreads**: Account for basis spreads between different floating rate indices.
 - **Valuation Date vs. Trade Date**: Always specify the valuation date; swap values change continuously as rates move.
-- **Data Inputs**: Load the swap settings and curve rate from Excel workbook. Assign these values into ratecurve and swap object.
-- **Available Models**: ratecurve object, Hull White model, Black Karasinski model, Black Dermon Toy model, Cox Ingersoll Ross model and Linear Gaussian 2F model
+- **Data Inputs**: Load the swap settings and curve rate from the Excel workbook. Assign these values into ratecurve and the swap object.
+- **Available Models**: ratecurve object, Hull White model, Black Karasinski model, Black Dermon Toy model, Cox Ingersoll Ross model, and Linear Gaussian 2F model
 - **Available Pricers**: Discount, IRTree for Hull White, Black Karasinski, Cox Ingersoll Ross, or Black Derman Toy models; IRMonteCarlo for Hull White, Black Karasinski, or Linear Gaussian 2F models
 
 
